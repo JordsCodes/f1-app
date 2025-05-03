@@ -1,12 +1,27 @@
 import express from "express";
+import Circuits from "./api/routes/circuit/circuit.controller.js";
+import { Request, Response, NextFunction } from "express";
 
 const app = express();
 const port = 3000;
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.json({
+    availableEndpoints: {
+      circuits: "/circuits",
+    },
+  });
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+app.use("/circuits/", Circuits);
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error(err);
+  res.status(500).send({ error: "Internal server error" });
 });
+
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found", path: req.originalUrl });
+});
+
+app.listen(port);
