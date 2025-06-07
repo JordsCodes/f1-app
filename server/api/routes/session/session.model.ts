@@ -22,5 +22,11 @@ export interface Circuit {
   countryKey: number;
   countryCode: string;
   countryName: string;
-  meetingKey: number;
+  practice1Key: number;
+  practice2Key: number;
+  practice3Key?: number;
+  sprintShootoutKey?: number;
+  sprintKey?: number;
+  qualifyingKey: number;
+  raceKey: number;
 }

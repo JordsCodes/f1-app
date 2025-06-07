@@ -1,5 +1,6 @@
 import express from "express";
-import Circuits from "./api/routes/circuit/circuit.controller.js";
+import Sessions from "./api/routes/session/session.controller.js";
+import LapPositions from "./api/routes/lap-position/lap-position.controller.js";
 import { Request, Response, NextFunction } from "express";
 
 const app = express();
@@ -13,7 +14,8 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/circuits/", Circuits);
+app.use("/session/", Sessions);
+app.use("/lap-position/", LapPositions);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error(err);

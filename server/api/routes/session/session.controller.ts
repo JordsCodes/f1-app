@@ -1,10 +1,10 @@
 import express from "express";
-import { getCircuitsForYear } from "./circuit.service.js";
-import { isValidYear } from "./circuit.utils.js";
+import { getSessionsForYear } from "./session.service.js";
+import { isValidYear } from "./session.utils.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", async (_req, res) => {
   res.status(400).json("No year provided.");
 });
 
@@ -19,8 +19,8 @@ router.get("/:year", async (req, res) => {
     return;
   }
 
-  const circuits = await getCircuitsForYear(Number(year));
-  res.status(200).send(circuits);
+  const sessions = await getSessionsForYear(Number(year));
+  res.status(200).send(sessions);
 });
 
 export default router;
