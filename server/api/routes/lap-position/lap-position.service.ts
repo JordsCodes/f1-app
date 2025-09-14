@@ -1,22 +1,11 @@
 import axios from "axios";
-import { DriverResponse } from "./lap-position.model.js";
+import { UserInputError } from "./lap-position.utils.js";
+import { SessionResponse } from "./lap-position.model.js";
 
 export const generateLapPositions = async (
   sessions: { session: string; key: string }[]
 ) => {
-  const sessionPositions: Record<
-    string,
-    {
-      key: string;
-      drivers: Record<
-        string,
-        {
-          driverDetails: any;
-          positions: { lap: number; position: number }[];
-        }
-      >;
-    }
-  > = {};
+  const sessionPositions: SessionResponse = {};
 
   for (const session of sessions) {
     sessionPositions[session.session] = {
@@ -33,6 +22,12 @@ export const generateLapPositions = async (
     const { data: driverData } = await axios.get(
       `https://api.openf1.org/v1/drivers?session_key=${session.key}`
     );
+
+    if (!lapData || lapData.length === 0) {
+      throw new UserInputError(
+        `No data found for session:${session.session} key:${session.key}`
+      );
+    }
 
     // Build driver laps
     const allDriverLaps: Record<
@@ -98,9 +93,9 @@ export const generateLapPositions = async (
         const lap = driverLaps[i];
         const nextLapStart = driverLaps[i + 1]?.lapStart || Infinity;
 
-        const positionsThisLap = driverPositions.filter(
-          (p) => p.date >= lap.lapStart && p.date < nextLapStart
-        );
+        const positionsThisLap = driverPositions
+          .filter((p) => p.date >= lap.lapStart && p.date < nextLapStart)
+          .sort((a, b) => a.date - b.date);
 
         if (positionsThisLap.length === 0) continue;
 

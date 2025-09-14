@@ -1,32 +1,42 @@
 import express from "express";
 import { generateLapPositions } from "./lap-position.service.js";
+import { UserInputError } from "./lap-position.utils.js";
+
+const VALID_SESSIONS = new Set(["sprint", "race"]);
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const {
-    practice1,
-    practice2,
-    practice3,
-    sprintShootout,
-    sprint,
-    qualifying,
-    race,
-  } = req.query;
+  try {
+    const params = Object.entries(req.query);
+    const validParams = params.filter((k) => VALID_SESSIONS.has(k[0]));
+    const invalidParams = params.filter((k) => !VALID_SESSIONS.has(k[0]));
 
-  const sessions = [
-    { session: "practice1", key: practice1 as string },
-    { session: "practice2", key: practice2 as string },
-    { session: "practice3", key: practice3 as string },
-    { session: "sprintShootout", key: sprintShootout as string },
-    { session: "sprint", key: sprint as string },
-    { session: "qualifying", key: qualifying as string },
-    { session: "race", key: race as string },
-  ].filter((s) => s.key);
+    if (invalidParams.length > 0) {
+      res.status(400).json({
+        error: "Invalid query parameters provided by user",
+        providedParams: params,
+        invalidParams,
+        validParams: Array.from(VALID_SESSIONS),
+      });
+    }
 
-  const lapPositions = await generateLapPositions(sessions);
+    if (validParams.length === 0)
+      res.status(400).json("No sessions have been provided");
 
-  res.status(200).send(lapPositions);
+    const sessions = validParams.map(([session, key]) => ({
+      session,
+      key: String(key),
+    }));
+
+    const lapPositions = await generateLapPositions(sessions);
+
+    res.status(200).send(lapPositions);
+  } catch (err: any) {
+    if (err instanceof UserInputError)
+      res.status(400).json({ error: err.message });
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 export default router;
