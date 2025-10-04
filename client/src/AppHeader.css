@@ -1,0 +1,14 @@
+.header-container {
+  display: flex;
+  align-items: baseline;
+  gap: 15px;
+}
+.header-text {
+  font-size: clamp(2.5rem, 4vw, 3rem);
+  font-weight: 350;
+  color: #151a30;
+  margin-bottom: 0;
+}
+.header-icon {
+  margin-top: 15px;
+}
