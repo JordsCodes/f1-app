@@ -1,6 +1,6 @@
 import express from "express";
-import { getSessionsForYear } from "./session.service.js";
-import { isValidYear } from "./session.utils.js";
+import { getSessionsForYear } from "./circuit-session.service.js";
+import { isValidYear } from "./cirucit-session.utils.js";
 
 const router = express.Router();
 

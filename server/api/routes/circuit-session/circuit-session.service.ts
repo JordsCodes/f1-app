@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SessionResponse, Circuit } from "./session.model.js";
+import { SessionResponse, Circuit } from "./circuit-session.model.js";
 
 export const getSessionsForYear = async (year: number) => {
   const { data } = await axios.get(
@@ -87,12 +87,5 @@ export const getSessionsForYear = async (year: number) => {
 
   return {
     circuits,
-    practice1,
-    practice2,
-    practice3,
-    sprintShootout,
-    sprint,
-    qualifying,
-    race,
   };
 };

@@ -1,5 +1,5 @@
 import express from "express";
-import Sessions from "./api/routes/session/session.controller.js";
+import CircuitSessions from "./api/routes/circuit-session/circuit-session.controller.js";
 import LapPositions from "./api/routes/lap-position/lap-position.controller.js";
 import { Request, Response, NextFunction } from "express";
 
@@ -9,13 +9,14 @@ const port = 3000;
 app.get("/", (req, res) => {
   res.json({
     availableEndpoints: {
-      circuits: "/circuits",
+      sessions: "/api/v1/circuit-session/",
+      lapPositions: "/api/v1/lap-position/",
     },
   });
 });
 
-app.use("/session/", Sessions);
-app.use("/lap-position/", LapPositions);
+app.use("/api/v1/circuit-session/", CircuitSessions);
+app.use("/api/v1/lap-position/", LapPositions);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
