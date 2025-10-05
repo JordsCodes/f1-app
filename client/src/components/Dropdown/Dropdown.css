@@ -49,6 +49,7 @@
   color: #151a30;
   background: white;
   cursor: pointer;
+  z-index: 100;
 }
 .dropdown-option:hover {
   background-color: #f3f3f9;
