@@ -1,15 +1,26 @@
 import "./Dropdown.css";
 import { ChevronDown } from "lucide-react";
-import { useState, useEffect, useRef, Dispatch, SetStateAction } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  Dispatch,
+  SetStateAction,
+  ReactNode,
+} from "react";
 
-type OptionLabel = { label: string };
+type OptionLabel = {
+  render?: (args: unknown) => ReactNode;
+  label: string;
+};
 
 interface DropdownProps<T extends OptionLabel> {
   label: string;
   placeholder: string;
-  options: T[];
+  options: T[] | undefined;
   value?: T;
   onSelect: (option: T) => void;
+  disabled: boolean;
 }
 
 interface SelectListProps<T> {
@@ -32,6 +43,7 @@ export default function Dropdown<T extends OptionLabel>({
   options,
   value,
   onSelect,
+  disabled,
 }: DropdownProps<T>) {
   const [displaySelectList, setDisplaySelectList] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -54,7 +66,9 @@ export default function Dropdown<T extends OptionLabel>({
       <p className="dropdown-label">{label}</p>
       <div ref={dropdownRef}>
         <div
-          className={`dropdown-select ${displaySelectList ? "active" : ""}`}
+          className={`dropdown-select ${displaySelectList ? "active" : ""} ${
+            disabled ? "disabled" : ""
+          }`}
           onClick={() => {
             setDisplaySelectList(!displaySelectList);
           }}
@@ -105,11 +119,11 @@ function Option<T extends OptionLabel>({
     <div
       className="dropdown-option"
       onClick={() => {
-        onSelect(option);
         setDisplaySelectList(!displaySelectList);
+        onSelect(option);
       }}
     >
-      {option.label}
+      {option.render ? option.render(option) : option.label}
     </div>
   );
 }

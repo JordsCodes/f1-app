@@ -32,15 +32,28 @@
   border-color: #0e69f1;
 }
 
+.dropdown-select.disabled {
+  background-color: #f3f3f3;
+  border-color: #dcdce3;
+  color: #a0a0b0;
+  pointer-events: none;
+}
+
+.dropdown-select.disabled .dropdown-value {
+  color: #b0b0bf;
+}
+
 .dropdown-menu {
   position: absolute;
   border: 1px solid #dcdce3;
   border-radius: 6px;
   margin-top: 4px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  overflow: scroll;
+  overflow-x: hidden;
   width: 100%;
   z-index: 50;
+  max-height: 300px;
 }
 
 .dropdown-option {
@@ -50,6 +63,8 @@
   background: white;
   cursor: pointer;
   z-index: 100;
+  display: flex;
+  gap: 8px;
 }
 .dropdown-option:hover {
   background-color: #f3f3f9;
