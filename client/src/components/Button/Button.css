@@ -9,6 +9,11 @@
   cursor: pointer;
 }
 
+.button.disabled {
+  background-color: #afcdfb;
+  pointer-events: none;
+}
+
 .button-text {
   color: white;
   margin: 0;

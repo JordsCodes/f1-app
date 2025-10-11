@@ -1,10 +1,17 @@
 import Dropdown from "../../../../components/Dropdown/Dropdown";
 import Button from "../../../../components/Button/Button";
 import "./Controls.css";
+import Flag from "react-flagpack";
+import { Circuit } from "../../types";
 
 interface ControlsProps {
   season?: { label: string };
   setSeason: (season: { label: string }) => void;
+  circuit?: Circuit;
+  setCircuit: (circuit: Circuit | undefined) => void;
+  circuits?: Circuit[];
+  getCircuits: (season: string) => void;
+  getLapPositions: (keys: Record<string, string | undefined>[]) => void;
 }
 
 const getSeasons = () => {
@@ -20,7 +27,51 @@ const getSeasons = () => {
   return dates;
 };
 
-export default function Controls({ season, setSeason }: ControlsProps) {
+const getFlag = (countryCode: string) => {
+  let code;
+  switch (countryCode) {
+    case "KSA": // Saudi Arabia
+      code = "SA";
+      break;
+    case "MON": // Monaco
+      code = "MC";
+      break;
+    case "NED": // Netherlands
+      code = "NL";
+      break;
+    case "UAE": // United Arab Emirates
+      code = "AE";
+      break;
+    default:
+      code = countryCode;
+  }
+  return (
+    <Flag
+      code={code}
+      gradient="real-linear"
+      size="m"
+      hasDropShadow
+      hasBorderRadius
+    />
+  );
+};
+
+export default function Controls({
+  season,
+  setSeason,
+  circuit,
+  setCircuit,
+  circuits,
+  getLapPositions,
+  getCircuits,
+}: ControlsProps) {
+  const handleSeasonSelect = (newSeason: { label: string }) => {
+    if (newSeason.label === season?.label) return;
+    setSeason(newSeason);
+    getCircuits(newSeason.label);
+    setCircuit(undefined);
+  };
+  const { sprintKey: sprint, raceKey: race } = circuit ?? {};
   return (
     <div className="controls-container">
       <Dropdown
@@ -28,17 +79,38 @@ export default function Controls({ season, setSeason }: ControlsProps) {
         placeholder="Select a season"
         options={getSeasons()}
         value={season}
-        onSelect={setSeason}
+        onSelect={handleSeasonSelect}
+        disabled={false}
       />
       <Dropdown
         label="Circuit"
         placeholder="Select a circuit"
-        options={[{ label: "Circuit 1" }]}
-        value={undefined}
-        onSelect={() => console.log("clicked")}
+        options={circuits?.map((c) => ({
+          ...c,
+          render: (circuit: { countryCode: string; label: string }) => (
+            <>
+              {getFlag(circuit.countryCode)}
+              {circuit.label}
+            </>
+          ),
+        }))}
+        value={circuit}
+        onSelect={setCircuit}
+        disabled={circuits?.length === 0}
       ></Dropdown>
       <div className="button-container">
-        <Button label="Go Racing!" />
+        <Button
+          label="Go Racing!"
+          onClick={() => {
+            getLapPositions(
+              [
+                ...(sprint ? [{ sprint }] : []),
+                ...(race ? [{ race }] : []),
+              ].filter(Boolean)
+            );
+          }}
+          disabled={!circuit}
+        />
       </div>
     </div>
   );
