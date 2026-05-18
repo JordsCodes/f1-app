@@ -11,6 +11,7 @@ export const generateLapPositions = async (
     sessionPositions[session.session] = {
       key: session.key,
       drivers: {},
+      lapCount: 0,
     };
 
     const { data: lapData } = await axios.get(
@@ -50,6 +51,9 @@ export const generateLapPositions = async (
           laps: [{ lapStart, lapNumber: lap.lap_number }],
         };
       } else {
+        // Might as well find out the number of laps here
+        if (lap.lap_number > sessionPositions[session.session].lapCount)
+          sessionPositions[session.session].lapCount = lap.lap_number;
         allDriverLaps[driver.driver_number].laps.push({
           lapStart,
           lapNumber: lap.lap_number,

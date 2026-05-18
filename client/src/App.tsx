@@ -4,6 +4,7 @@ import Controls from "./features/race-metrics/components/Controls/Controls";
 import { useState } from "react";
 import useRaceData from "./features/race-metrics/hooks/use-race-data";
 import { Circuit } from "./features/race-metrics/types";
+import LineGraph from "./features/race-metrics/components/LineGraph/LineGraph";
 
 export default function App() {
   const [season, setSeason] = useState<{ label: string } | undefined>();
@@ -15,6 +16,7 @@ export default function App() {
     lapPositions,
     lapPositionsLoading,
   } = useRaceData();
+
   return (
     <div className="app-container">
       <AppHeader header="Chequered Stats" />
@@ -26,7 +28,8 @@ export default function App() {
         circuits={circuits}
         getLapPositions={getLapPositions}
         getCircuits={getCircuits}
-      />
+      />{" "}
+      {lapPositions && <LineGraph data={lapPositions.race} />}
     </div>
   );
 }

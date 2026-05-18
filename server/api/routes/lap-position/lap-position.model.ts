@@ -18,6 +18,7 @@ export interface SessionResponse
     string,
     {
       key: string;
+      lapCount: number;
       drivers: Record<
         string,
         {

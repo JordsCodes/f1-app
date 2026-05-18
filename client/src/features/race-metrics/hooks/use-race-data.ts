@@ -18,6 +18,7 @@ export default function useRaceData() {
       const { data } = await axios.get(
         `${BASE_API_URL}/lap-position?${keyParams}`
       );
+      console.log({ data });
       setLapPositionsLoading(true);
       setLapPositions({ ...data });
     } catch (error: unknown) {
