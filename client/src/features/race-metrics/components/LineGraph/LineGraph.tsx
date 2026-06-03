@@ -20,6 +20,8 @@ interface LineGraphProps {
   };
 }
 
+const DEFAULT_POSITIONS = 10;
+
 const getLapLabels = (lapCount: number) => {
   let i = 0;
   const lapLabels = [];
@@ -42,13 +44,25 @@ function fillLapGaps(positions: { x: number; y: number }[], totalLaps: number) {
   return filled;
 }
 
+function getDriversUntilPosition(drivers: Driver[], position: number) {
+  const topDrivers = [];
+  for (const key in drivers) {
+    console.log({ driver: drivers[key] });
+    const finishingPosition = drivers[key].positions.at(-1).position;
+    if (finishingPosition <= position) topDrivers.push(drivers[key]);
+  }
+  return topDrivers;
+}
+
 export default function LineGraph({ data }: LineGraphProps) {
   const canvasRef = useRef(null);
   useEffect(() => {
     if (!canvasRef.current) return;
 
     const lapCount = data.lapCount;
-    const driverLapData = Object.values(data.drivers).map((d) => ({
+    const driverLapData = Object.values(
+      getDriversUntilPosition(data.drivers, DEFAULT_POSITIONS),
+    ).map((d) => ({
       label: d.driverDetails.broadcast_name,
       data: [
         ...fillLapGaps(
