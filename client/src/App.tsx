@@ -9,13 +9,8 @@ import LineGraph from "./features/race-metrics/components/LineGraph/LineGraph";
 export default function App() {
   const [season, setSeason] = useState<{ label: string } | undefined>();
   const [circuit, setCircuit] = useState<Circuit | undefined>();
-  const {
-    circuits,
-    getCircuits,
-    getLapPositions,
-    lapPositions,
-    lapPositionsLoading,
-  } = useRaceData();
+  const { circuits, getCircuits, getLapPositions, lapPositions } =
+    useRaceData();
 
   return (
     <div className="app-container">

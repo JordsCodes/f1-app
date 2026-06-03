@@ -1,5 +1,6 @@
 import Chart from "chart.js/auto";
 import { useEffect, useRef } from "react";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 
 interface PositionPoint {
   lap: number;
@@ -9,6 +10,8 @@ interface PositionPoint {
 interface Driver {
   driverDetails: {
     broadcast_name: string;
+    team_colour: string;
+    team_name: string;
   };
   positions: PositionPoint[];
 }
@@ -44,7 +47,10 @@ function fillLapGaps(positions: { x: number; y: number }[], totalLaps: number) {
   return filled;
 }
 
-function getDriversUntilPosition(drivers: Driver[], position: number) {
+function getDriversUntilPosition(
+  drivers: Record<string, Driver>,
+  position: number,
+) {
   const topDrivers = [];
   for (const key in drivers) {
     console.log({ driver: drivers[key] });
@@ -58,21 +64,24 @@ export default function LineGraph({ data }: LineGraphProps) {
   const canvasRef = useRef(null);
   useEffect(() => {
     if (!canvasRef.current) return;
-
     const lapCount = data.lapCount;
     const driverLapData = Object.values(
       getDriversUntilPosition(data.drivers, DEFAULT_POSITIONS),
     ).map((d) => ({
-      label: d.driverDetails.broadcast_name,
+      label: `${d.driverDetails.broadcast_name} (${d.driverDetails.team_name})`,
       data: [
         ...fillLapGaps(
-          d.positions.map((p) => ({ x: p.lap, y: p.position })),
+          d.positions.map((p) => ({
+            x: p.lap,
+            y: p.position,
+          })),
           lapCount,
         ),
-        { x: lapCount, y: d.positions[d.positions.length - 1]?.position },
       ],
+      backgroundColor: `#${d.driverDetails.team_colour}`,
+      borderColor: `#${d.driverDetails.team_colour}`,
     }));
-
+    Chart.register(ChartDataLabels);
     const chart = new Chart(canvasRef.current, {
       type: "line",
       data: {
@@ -80,22 +89,59 @@ export default function LineGraph({ data }: LineGraphProps) {
         datasets: driverLapData,
       },
       options: {
+        plugins: {
+          tooltip: {
+            callbacks: {
+              title: (items) => `Lap ${items[0].label}`,
+              label: (context) =>
+                `${context.dataset.label} — P${context.parsed.y}`,
+            },
+          },
+          datalabels: {
+            align: "right",
+            clip: false,
+            formatter: function (_value, context) {
+              const isLast =
+                context.dataIndex + 1 === context.dataset.data.length;
+
+              if (isLast) return context.dataset.label;
+              return null;
+            },
+            font: {
+              size: 12,
+            },
+          },
+          legend: {
+            display: false,
+          },
+        },
+        layout: {
+          padding: { right: 300, top: 50 },
+        },
         scales: {
           y: {
             reverse: true,
             title: {
               display: true,
               text: "Position",
+              font: {
+                size: 16,
+              },
             },
-            min: 1,
             ticks: {
               stepSize: 1,
+              callback: (value) => {
+                return value === 0 ? "" : value;
+              },
             },
           },
           x: {
             title: {
               display: true,
               text: "Lap",
+              font: {
+                size: 16,
+              },
             },
           },
         },
