@@ -1,29 +1,13 @@
 import Chart from "chart.js/auto";
 import { useEffect, useRef } from "react";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-
-interface PositionPoint {
-  lap: number;
-  position: number;
-}
-
-interface Driver {
-  driverDetails: {
-    broadcast_name: string;
-    team_colour: string;
-    team_name: string;
-  };
-  positions: PositionPoint[];
-}
-
+import LineGraphControls from "./LineGraphControls";
+import { DriverLapPositions } from "../../types";
 interface LineGraphProps {
-  data: {
-    lapCount: number;
-    drivers: Record<string, Driver>;
-  };
+  data: Record<string, DriverLapPositions>;
+  lapCount: number;
+  filterTopDrivers: (topDrivers: number) => void;
 }
-
-const DEFAULT_POSITIONS = 10;
 
 const getLapLabels = (lapCount: number) => {
   let i = 0;
@@ -43,31 +27,18 @@ function fillLapGaps(positions: { x: number; y: number }[], totalLaps: number) {
       .sort((a, b) => b.x - a.x)[0];
     if (latest) filled.push({ x: lap, y: latest.y });
   }
-
   return filled;
 }
 
-function getDriversUntilPosition(
-  drivers: Record<string, Driver>,
-  position: number,
-) {
-  const topDrivers = [];
-  for (const key in drivers) {
-    console.log({ driver: drivers[key] });
-    const finishingPosition = drivers[key].positions.at(-1).position;
-    if (finishingPosition <= position) topDrivers.push(drivers[key]);
-  }
-  return topDrivers;
-}
-
-export default function LineGraph({ data }: LineGraphProps) {
+export default function LineGraph({
+  data,
+  lapCount,
+  filterTopDrivers,
+}: LineGraphProps) {
   const canvasRef = useRef(null);
   useEffect(() => {
     if (!canvasRef.current) return;
-    const lapCount = data.lapCount;
-    const driverLapData = Object.values(
-      getDriversUntilPosition(data.drivers, DEFAULT_POSITIONS),
-    ).map((d) => ({
+    const driverLapData = Object.values(data).map((d) => ({
       label: `${d.driverDetails.broadcast_name} (${d.driverDetails.team_name})`,
       data: [
         ...fillLapGaps(
@@ -116,7 +87,7 @@ export default function LineGraph({ data }: LineGraphProps) {
           },
         },
         layout: {
-          padding: { right: 300, top: 50 },
+          padding: { right: 300, top: 20 },
         },
         scales: {
           y: {
@@ -148,7 +119,14 @@ export default function LineGraph({ data }: LineGraphProps) {
       },
     });
     return () => chart.destroy();
-  }, [data]);
+  }, [data, lapCount]);
 
-  return <canvas ref={canvasRef}></canvas>;
+  return (
+    <>
+      <LineGraphControls
+        onClick={(topDrivers: number) => filterTopDrivers(topDrivers)}
+      />
+      <canvas ref={canvasRef} />
+    </>
+  );
 }

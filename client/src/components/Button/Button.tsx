@@ -3,7 +3,7 @@ import "./Button.css";
 interface ButtonProps {
   label: string;
   onClick: () => void;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 export default function Button({ label, onClick, disabled }: ButtonProps) {
