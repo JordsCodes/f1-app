@@ -6,6 +6,8 @@ const DEFAULT_TOP_DRIVERS = 10;
 
 export default function useRaceData() {
   const [circuits, setCircuits] = useState([]);
+  const [allDriverLapPositions, setAllDriverLapPositions] =
+    useState<Record<string, DriverLapPositions>>();
   const [driverLapPositions, setDriverLapPositions] =
     useState<Record<string, DriverLapPositions>>();
   const [lapCount, setLapCount] = useState();
@@ -18,7 +20,8 @@ export default function useRaceData() {
   ) {
     const topDrivers: Record<string, DriverLapPositions> = {};
     for (const key in drivers) {
-      const finishingPosition = drivers[key].positions[drivers[key].positions.length - 1].position;
+      const finishingPosition =
+        drivers[key].positions[drivers[key].positions.length - 1].position;
       if (finishingPosition <= position) topDrivers[key] = drivers[key];
     }
     return topDrivers;
@@ -26,19 +29,17 @@ export default function useRaceData() {
 
   async function getLapPositions(keys: Record<string, string | undefined>[]) {
     if (keys.length === 0) return;
-    const keyParams = keys
-      .map((key) =>
-        Object.entries(key).map(([key, value]) => `${key}=${value}`),
-      )
-      .join("&");
+    // hardcode to just the race
+    const raceKey = keys.filter((k) => k.race)[0].race;
     try {
       const { data } = await axios.get(
-        `${BASE_API_URL}/lap-position?${keyParams}`,
+        `${BASE_API_URL}/lap-position?race=${raceKey}`,
       );
       setLapPositionsLoading(true);
       setDriverLapPositions(
         getDriversUntilPosition(data.race.drivers, DEFAULT_TOP_DRIVERS),
       );
+      setAllDriverLapPositions(data.race.drivers);
       setLapCount(data.race.lapCount);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -76,6 +77,7 @@ export default function useRaceData() {
     setCircuits,
     getCircuits,
     getLapPositions,
+    allDriverLapPositions,
     driverLapPositions,
     setDriverLapPositions,
     lapPositionsLoading,
