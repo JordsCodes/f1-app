@@ -2,8 +2,21 @@ import axios from "axios";
 import { SessionResponse, Circuit } from "./circuit-session.model.js";
 
 export const getSessionsForYear = async (year: number) => {
+  const now = new Date();
+  const startDate = new Date(year, 0, 1);
+  let endDate: Date;
+  if (year === now.getFullYear()) {
+    // 7 days before today, accounts for delay on openf1s side
+    endDate = new Date(now);
+    endDate.setDate(endDate.getDate() - 7);
+  } else {
+    // December 31st of the requested year
+    endDate = new Date(year, 11, 31);
+  }
+  const start = startDate.toISOString().split("T")[0];
+  const end = endDate.toISOString().split("T")[0];
   const { data } = await axios.get(
-    `https://api.openf1.org/v1/sessions?date_start>=${year}-01-01&date_end<=${year}-12-31`
+    `https://api.openf1.org/v1/sessions?date_start>=${start}&date_end<=${end}`
   );
 
   const isPreSeasonTesting = (session: SessionResponse) => {
@@ -80,12 +93,12 @@ export const getSessionsForYear = async (year: number) => {
         )?.session_key,
         raceKey: race.find(
           (sr: SessionResponse) => sr.meeting_key === session.meeting_key
-        )?.session_key,
+        )?.session_key
       });
     return acc;
   }, []);
 
   return {
-    circuits,
+    circuits
   };
 };
