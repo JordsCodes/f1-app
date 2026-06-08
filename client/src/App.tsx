@@ -13,6 +13,7 @@ export default function App() {
     circuits,
     getCircuits,
     getLapPositions,
+    allDriverLapPositions,
     driverLapPositions,
     setDriverLapPositions,
     lapCount,
@@ -20,9 +21,9 @@ export default function App() {
   } = useRaceData();
 
   const filterTopDrivers = (position: number) => {
-    if (!driverLapPositions) return;
+    if (!allDriverLapPositions) return;
     setDriverLapPositions(
-      getDriversUntilPosition(driverLapPositions, position),
+      getDriversUntilPosition(allDriverLapPositions, position),
     );
   };
 
