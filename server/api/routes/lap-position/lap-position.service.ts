@@ -3,7 +3,7 @@ import { UserInputError } from "./lap-position.utils.js";
 import { SessionResponse } from "./lap-position.model.js";
 
 export const generateLapPositions = async (
-  sessions: { session: string; key: string }[]
+  sessions: { session: string; key: string }[],
 ) => {
   const sessionPositions: SessionResponse = {};
 
@@ -13,20 +13,19 @@ export const generateLapPositions = async (
       drivers: {},
       lapCount: 0,
     };
-
     const { data: lapData } = await axios.get(
-      `https://api.openf1.org/v1/laps?session_key=${session.key}`
+      `https://api.openf1.org/v1/laps?session_key=${session.key}`,
     );
     const { data: positionData } = await axios.get(
-      `https://api.openf1.org/v1/position?session_key=${session.key}`
+      `https://api.openf1.org/v1/position?session_key=${session.key}`,
     );
     const { data: driverData } = await axios.get(
-      `https://api.openf1.org/v1/drivers?session_key=${session.key}`
+      `https://api.openf1.org/v1/drivers?session_key=${session.key}`,
     );
 
     if (!lapData || lapData.length === 0) {
       throw new UserInputError(
-        `No data found for session:${session.session} key:${session.key}`
+        `No data found for session:${session.session} key:${session.key}`,
       );
     }
 
@@ -36,29 +35,34 @@ export const generateLapPositions = async (
       { driverDetails: any; laps: { lapStart: number; lapNumber: number }[] }
     > = {};
 
+    for (const driver of driverData) {
+      allDriverLaps[driver.driver_number] = {
+        driverDetails: driver,
+        laps: [
+          {
+            lapStart: 0,
+            lapNumber: 0,
+          },
+        ],
+      };
+    }
+
     for (const lap of lapData) {
       const driver = driverData.find(
-        (d: any) => d.driver_number === lap.driver_number
+        (d: any) => d.driver_number === lap.driver_number,
       );
 
       const lapStart = lap.date_start
         ? new Date(lap.date_start).getTime()
         : new Date("2020-01-01T00:00:00.000Z").getTime();
 
-      if (!allDriverLaps[driver.driver_number]) {
-        allDriverLaps[driver.driver_number] = {
-          driverDetails: driver,
-          laps: [{ lapStart, lapNumber: lap.lap_number }],
-        };
-      } else {
-        // Might as well find out the number of laps here
-        if (lap.lap_number > sessionPositions[session.session].lapCount)
-          sessionPositions[session.session].lapCount = lap.lap_number;
-        allDriverLaps[driver.driver_number].laps.push({
-          lapStart,
-          lapNumber: lap.lap_number,
-        });
-      }
+      // Might as well find out the number of laps here
+      if (lap.lap_number > sessionPositions[session.session].lapCount)
+        sessionPositions[session.session].lapCount = lap.lap_number;
+      allDriverLaps[driver.driver_number].laps.push({
+        lapStart,
+        lapNumber: lap.lap_number,
+      });
     }
 
     // Build driver positions
