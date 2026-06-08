@@ -3,15 +3,22 @@ import "./LineGraphControls.css";
 
 interface LineGraphControlsProps {
   onClick: (filterNumber: number) => void;
+  topPositions: number[];
 }
 
-export default function LineGraphControls({ onClick }: LineGraphControlsProps) {
+export default function LineGraphControls({
+  onClick,
+  topPositions
+}: LineGraphControlsProps) {
   return (
     <div className="line-graph-controls-container">
-      <Button label="Top 5" onClick={() => onClick(5)} />
-      <Button label="Top 10" onClick={() => onClick(10)} />
-      <Button label="Top 15" onClick={() => onClick(15)} />
-      <Button label="Top 20" onClick={() => onClick(20)} />
+      {topPositions.map((position: number) => (
+        <Button
+          key={position}
+          label={`Top ${position}`}
+          onClick={() => onClick(position)}
+        />
+      ))}
     </div>
   );
 }

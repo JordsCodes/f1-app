@@ -7,6 +7,7 @@ interface LineGraphProps {
   data: Record<string, DriverLapPositions>;
   lapCount: number;
   filterTopDrivers: (topDrivers: number) => void;
+  season: number;
 }
 
 const getLapLabels = (lapCount: number) => {
@@ -17,6 +18,11 @@ const getLapLabels = (lapCount: number) => {
     lapLabels.push(i);
   }
   return lapLabels;
+};
+
+const getTopPositions = (season: number): number[] => {
+  if (season >= 2026) return [5, 10, 15, 22];
+  return [5, 10, 15, 20];
 };
 
 function fillLapGaps(positions: { x: number; y: number }[], totalLaps: number) {
@@ -34,6 +40,7 @@ export default function LineGraph({
   data,
   lapCount,
   filterTopDrivers,
+  season
 }: LineGraphProps) {
   const canvasRef = useRef(null);
   useEffect(() => {
@@ -44,20 +51,20 @@ export default function LineGraph({
         ...fillLapGaps(
           d.positions.map((p) => ({
             x: p.lap,
-            y: p.position,
+            y: p.position
           })),
-          lapCount,
-        ),
+          lapCount
+        )
       ],
       backgroundColor: `#${d.driverDetails.team_colour}`,
-      borderColor: `#${d.driverDetails.team_colour}`,
+      borderColor: `#${d.driverDetails.team_colour}`
     }));
     Chart.register(ChartDataLabels);
     const chart = new Chart(canvasRef.current, {
       type: "line",
       data: {
         labels: getLapLabels(lapCount),
-        datasets: driverLapData,
+        datasets: driverLapData
       },
       options: {
         plugins: {
@@ -65,8 +72,8 @@ export default function LineGraph({
             callbacks: {
               title: (items) => `Lap ${items[0].label}`,
               label: (context) =>
-                `${context.dataset.label} — P${context.parsed.y}`,
-            },
+                `${context.dataset.label} — P${context.parsed.y}`
+            }
           },
           datalabels: {
             align: "right",
@@ -79,15 +86,15 @@ export default function LineGraph({
               return null;
             },
             font: {
-              size: 12,
-            },
+              size: 12
+            }
           },
           legend: {
-            display: false,
-          },
+            display: false
+          }
         },
         layout: {
-          padding: { right: 300, top: 20 },
+          padding: { right: 300, top: 20 }
         },
         scales: {
           y: {
@@ -96,27 +103,27 @@ export default function LineGraph({
               display: true,
               text: "Position",
               font: {
-                size: 16,
-              },
+                size: 16
+              }
             },
             ticks: {
               stepSize: 1,
               callback: (value) => {
                 return value === 0 ? "" : value;
-              },
-            },
+              }
+            }
           },
           x: {
             title: {
               display: true,
               text: "Lap",
               font: {
-                size: 16,
-              },
-            },
-          },
-        },
-      },
+                size: 16
+              }
+            }
+          }
+        }
+      }
     });
     return () => chart.destroy();
   }, [data, lapCount]);
@@ -125,6 +132,7 @@ export default function LineGraph({
     <>
       <LineGraphControls
         onClick={(topDrivers: number) => filterTopDrivers(topDrivers)}
+        topPositions={getTopPositions(season)}
       />
       <canvas ref={canvasRef} />
     </>

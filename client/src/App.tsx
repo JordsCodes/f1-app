@@ -17,13 +17,13 @@ export default function App() {
     driverLapPositions,
     setDriverLapPositions,
     lapCount,
-    getDriversUntilPosition,
+    getDriversUntilPosition
   } = useRaceData();
 
   const filterTopDrivers = (position: number) => {
     if (!allDriverLapPositions) return;
     setDriverLapPositions(
-      getDriversUntilPosition(allDriverLapPositions, position),
+      getDriversUntilPosition(allDriverLapPositions, position)
     );
   };
 
@@ -32,18 +32,22 @@ export default function App() {
       <AppHeader header="Chequered Stats" />
       <Controls
         season={season}
-        setSeason={setSeason}
+        setSeason={(season) => {
+          setSeason(season);
+          setDriverLapPositions(undefined);
+        }}
         circuit={circuit}
         setCircuit={setCircuit}
         circuits={circuits}
         getLapPositions={getLapPositions}
         getCircuits={getCircuits}
       />
-      {driverLapPositions && lapCount && (
+      {season && driverLapPositions && lapCount && (
         <LineGraph
           data={driverLapPositions}
           lapCount={lapCount}
           filterTopDrivers={filterTopDrivers}
+          season={Number(season.label)}
         />
       )}
     </div>
