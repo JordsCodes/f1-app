@@ -6,7 +6,7 @@ A web application for visualising Formula 1 race positions lap-by-lap using an i
 
 ## Prerequisites
 
-Before getting started, ensure you have node.js installed on your machine.
+- Node.js (recommended: Node.js 20+).
 
 ---
 
